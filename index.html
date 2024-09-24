@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Tracker</title>
+    <style>
+        #map {
+            height: 100vh; /* Full height */
+            width: 100%;   /* Full width */
+        }
+    </style>
+</head>
+<body>
+    <h3>Vehicle Tracking on Google Maps</h3>
+    <div id="map"></div> <!-- This is where the map will be displayed -->
+
+    <!-- Include Google Maps API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBYpgEwQu_wN9H8glNNCcxm5AnwpU7TEAA&callback=initMap">
+    </script>
+
+    <script>
+        let map;
+        let vehicleMarker;
+
+        // Initialize the map
+        function initMap() {
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: { lat: 17.385044, lng: 78.486671 },
+                zoom: 14,
+            });
+
+            // Vehicle marker icon
+            vehicleMarker = new google.maps.Marker({
+                position: { lat: 17.385044, lng: 78.486671 },
+                map: map,
+                icon: {
+                    url: "https://img.icons8.com/emoji/48/car-emoji.png",
+                    scaledSize: new google.maps.Size(50, 50),
+                },
+                title: "Vehicle",
+            });
+        }
+
+        // Update vehicle location on the map
+        function updateVehicleLocation(lat, lng) {
+            const newPosition = { lat: lat, lng: lng };
+            vehicleMarker.setPosition(newPosition); // Update marker position
+            map.panTo(newPosition); // Pan map to new location
+        }
+
+        // Fetch vehicle location data from the backend every 5 seconds
+        setInterval(() => {
+            fetch('http://localhost:3000/api/vehicle-location')
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach((location, index) => {
+                        setTimeout(() => {
+                            updateVehicleLocation(location.latitude, location.longitude);
+                        }, index * 2000); // Simulate 2 seconds between each point
+                    });
+                });
+        }, 5000); // Fetch new data every 5 seconds
+    </script>
+</body>
+</html>
